@@ -211,6 +211,46 @@
             cursor: pointer;
         }
         
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .checkbox-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #451372;
+        }
+        
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 400;
+        }
+        
         .file-upload {
             position: relative;
             display: inline-block;
@@ -390,24 +430,24 @@
                 </div>
                 
                 <div class="filter-item">
-                    <label for="statusFilter">📋 Status da Task</label>
-                    <select id="statusFilter">
-                        <option value="">Todos</option>
-                    </select>
+                    <label>📋 Status da Task</label>
+                    <div class="checkbox-group" id="statusFilterCheckboxes">
+                        <!-- Checkboxes will be populated here -->
+                    </div>
                 </div>
                 
                 <div class="filter-item">
-                    <label for="statusLeadFilter">🌡️ Status do Lead</label>
-                    <select id="statusLeadFilter">
-                        <option value="">Todos</option>
-                    </select>
+                    <label>🌡️ Status do Lead</label>
+                    <div class="checkbox-group" id="statusLeadFilterCheckboxes">
+                        <!-- Checkboxes will be populated here -->
+                    </div>
                 </div>
                 
                 <div class="filter-item">
-                    <label for="utmSourceFilter">🔗 UTM Source</label>
-                    <select id="utmSourceFilter">
-                        <option value="">Todos</option>
-                    </select>
+                    <label>🔗 UTM Source</label>
+                    <div class="checkbox-group" id="utmSourceFilterCheckboxes">
+                        <!-- Checkboxes will be populated here -->
+                    </div>
                 </div>
                 
                 <div class="filter-item">
@@ -692,59 +732,71 @@
         }
         
         function populateFilters() {
+            // Populate Status da Task checkboxes
             const statusSet = new Set();
             allData.forEach(row => {
                 const status = row['Status da Task'];
                 if (status) statusSet.add(status);
             });
             
-            const statusFilter = document.getElementById('statusFilter');
-            statusFilter.innerHTML = '<option value="">Todos</option>';
+            const statusCheckboxes = document.getElementById('statusFilterCheckboxes');
+            statusCheckboxes.innerHTML = '';
             
             const statusOrder = ['ATIVO', 'PRÉ-AGENDAMENTO', 'LEAD SEM INTERESSE', 'LEAD COM FUP PENDENTE', 'CHURN', 'LISTA DE ESPERA'];
             statusOrder.forEach(status => {
                 if (statusSet.has(status)) {
-                    const option = document.createElement('option');
-                    option.value = status;
-                    option.textContent = status;
-                    statusFilter.appendChild(option);
+                    const div = document.createElement('div');
+                    div.className = 'checkbox-item';
+                    div.innerHTML = `
+                        <input type="checkbox" id="status_${status}" value="${status}" checked onchange="applyFilter()">
+                        <label for="status_${status}">${status}</label>
+                    `;
+                    statusCheckboxes.appendChild(div);
                 }
             });
             
+            // Populate Status do Lead checkboxes
             const leadStatusSet = new Set();
             allData.forEach(row => {
                 const leadStatus = row['Status do Lead (drop down)'];
                 if (leadStatus && leadStatus.trim() !== '') leadStatusSet.add(leadStatus);
             });
             
-            const statusLeadFilter = document.getElementById('statusLeadFilter');
-            statusLeadFilter.innerHTML = '<option value="">Todos</option>';
+            const statusLeadCheckboxes = document.getElementById('statusLeadFilterCheckboxes');
+            statusLeadCheckboxes.innerHTML = '';
             
             const leadStatusOrder = ['Quente', 'Morna', 'Fria', 'Sem Interesse'];
             leadStatusOrder.forEach(status => {
                 if (leadStatusSet.has(status)) {
-                    const option = document.createElement('option');
-                    option.value = status;
-                    option.textContent = status;
-                    statusLeadFilter.appendChild(option);
+                    const div = document.createElement('div');
+                    div.className = 'checkbox-item';
+                    div.innerHTML = `
+                        <input type="checkbox" id="leadstatus_${status}" value="${status}" checked onchange="applyFilter()">
+                        <label for="leadstatus_${status}">${status}</label>
+                    `;
+                    statusLeadCheckboxes.appendChild(div);
                 }
             });
             
+            // Populate UTM Source checkboxes
             const utmSourceSet = new Set();
             allData.forEach(row => {
                 const utmSource = row['UTM - Source (short text)'];
                 if (utmSource && utmSource.trim() !== '') utmSourceSet.add(utmSource);
             });
             
-            const utmSourceFilter = document.getElementById('utmSourceFilter');
-            utmSourceFilter.innerHTML = '<option value="">Todos</option>';
+            const utmSourceCheckboxes = document.getElementById('utmSourceFilterCheckboxes');
+            utmSourceCheckboxes.innerHTML = '';
             
             const sortedUtmSources = Array.from(utmSourceSet).sort();
             sortedUtmSources.forEach(source => {
-                const option = document.createElement('option');
-                option.value = source;
-                option.textContent = source;
-                utmSourceFilter.appendChild(option);
+                const div = document.createElement('div');
+                div.className = 'checkbox-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="utm_${source}" value="${source}" checked onchange="applyFilter()">
+                    <label for="utm_${source}">${source}</label>
+                `;
+                utmSourceCheckboxes.appendChild(div);
             });
         }
         
@@ -778,11 +830,15 @@
         }
         
         function clearFilters() {
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('statusLeadFilter').value = '';
-            document.getElementById('utmSourceFilter').value = '';
+            // Check all checkboxes
+            document.querySelectorAll('#statusFilterCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = true);
+            document.querySelectorAll('#statusLeadFilterCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = true);
+            document.querySelectorAll('#utmSourceFilterCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = true);
+            
+            // Clear dates
             document.getElementById('dateFrom').value = '';
             document.getElementById('dateTo').value = '';
+            
             renderDiagram(allData);
             console.log('Filtros limpos, mostrando todos os dados:', allData.length);
         }
@@ -803,41 +859,54 @@
         function applyFilter() {
             const dateFrom = document.getElementById('dateFrom').value;
             const dateTo = document.getElementById('dateTo').value;
-            const statusFilter = document.getElementById('statusFilter').value;
-            const statusLeadFilter = document.getElementById('statusLeadFilter').value;
-            const utmSourceFilter = document.getElementById('utmSourceFilter').value;
+            
+            // Get selected Status da Task checkboxes
+            const selectedStatuses = Array.from(document.querySelectorAll('#statusFilterCheckboxes input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+            
+            // Get selected Status do Lead checkboxes
+            const selectedLeadStatuses = Array.from(document.querySelectorAll('#statusLeadFilterCheckboxes input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+            
+            // Get selected UTM Source checkboxes
+            const selectedUtmSources = Array.from(document.querySelectorAll('#utmSourceFilterCheckboxes input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
             
             console.log('Aplicando filtros:', {
-                dateFrom, dateTo, statusFilter, statusLeadFilter, utmSourceFilter
+                dateFrom, dateTo, selectedStatuses, selectedLeadStatuses, selectedUtmSources
             });
             
             let filteredData = allData;
             console.log('Total antes dos filtros:', filteredData.length);
             
-            if (statusFilter) {
+            // Filter by Status da Task
+            if (selectedStatuses.length > 0) {
                 filteredData = filteredData.filter(row => {
                     const statusTask = row['Status da Task'];
-                    return statusTask === statusFilter;
+                    return selectedStatuses.includes(statusTask);
                 });
                 console.log('Após filtro Status da Task:', filteredData.length);
             }
             
-            if (statusLeadFilter) {
+            // Filter by Status do Lead
+            if (selectedLeadStatuses.length > 0) {
                 filteredData = filteredData.filter(row => {
                     const statusLead = row['Status do Lead (drop down)'];
-                    return statusLead === statusLeadFilter;
+                    return selectedLeadStatuses.includes(statusLead);
                 });
                 console.log('Após filtro Status do Lead:', filteredData.length);
             }
             
-            if (utmSourceFilter) {
+            // Filter by UTM Source
+            if (selectedUtmSources.length > 0) {
                 filteredData = filteredData.filter(row => {
                     const utmSource = row['UTM - Source (short text)'];
-                    return utmSource === utmSourceFilter;
+                    return selectedUtmSources.includes(utmSource);
                 });
                 console.log('Após filtro UTM Source:', filteredData.length);
             }
             
+            // Filter by date range
             if (dateFrom) {
                 filteredData = filteredData.filter(row => {
                     const dateCreated = row['Date Created'];
@@ -985,8 +1054,8 @@
                 type: "sankey",
                 orientation: "h",
                 node: {
-                    pad: 80,
-                    thickness: 35,
+                    pad: 120,
+                    thickness: 40,
                     line: {
                         color: "white",
                         width: 2
