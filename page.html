@@ -20,6 +20,86 @@
             padding: 20px;
         }
         
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #451372 0%, #7a3b69 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .login-box img {
+            height: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .login-box h2 {
+            color: #451372;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+        
+        .login-box p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .login-box input:focus {
+            outline: none;
+            border-color: #451372;
+            box-shadow: 0 0 0 3px rgba(69, 19, 114, 0.1);
+        }
+        
+        .login-box button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #451372 0%, #7a3b69 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .login-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(69, 19, 114, 0.4);
+        }
+        
+        .login-error {
+            color: #dc3545;
+            margin-top: 15px;
+            display: none;
+            font-size: 0.9em;
+        }
+        
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -27,16 +107,21 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
+            display: none;
         }
         
         .header {
             background: linear-gradient(135deg, #451372 0%, #7a3b69 100%);
             color: white;
             padding: 30px;
-            text-align: center;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
             gap: 20px;
         }
         
@@ -45,19 +130,31 @@
             width: auto;
         }
         
-        .header-text {
-            text-align: left;
-        }
-        
-        .header h1 {
+        .header-text h1 {
             font-size: 2.5em;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             font-weight: 700;
         }
         
-        .header p {
+        .header-text p {
             font-size: 1.1em;
             opacity: 0.9;
+        }
+        
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: white;
+            color: #451372;
         }
         
         .filters {
@@ -227,22 +324,54 @@
         .loading.active {
             display: block;
         }
+        
+        .no-data {
+            text-align: center;
+            padding: 60px 30px;
+            color: #666;
+        }
+        
+        .no-data h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #451372;
+        }
+        
+        .no-data p {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <!-- Login Screen -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
             <img src="arivi_logo.png" alt="ARIVI Logo">
-            <div class="header-text">
-                <h1>Funil de Vendas ARIVI</h1>
-                <p>Visualização do fluxo de leads e conversões</p>
+            <h2>Bem-vindo</h2>
+            <p>Acesso restrito ao Funil de Vendas</p>
+            <input type="password" id="passwordInput" placeholder="Digite a senha" onkeypress="if(event.key==='Enter') login()">
+            <button onclick="login()">Entrar</button>
+            <div class="login-error" id="loginError">❌ Senha incorreta. Tente novamente.</div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div class="container" id="mainContainer">
+        <div class="header">
+            <div class="header-left">
+                <img src="arivi_logo.png" alt="ARIVI Logo">
+                <div class="header-text">
+                    <h1>Funil de Vendas ARIVI</h1>
+                    <p>Visualização do fluxo de leads e conversões</p>
+                </div>
             </div>
+            <button class="logout-btn" onclick="logout()">🚪 Sair</button>
         </div>
         
         <div class="filters">
             <div class="filter-group">
                 <div class="filter-item">
-                    <label>📂 Atualizar Arquivo Excel</label>
+                    <label>📂 Fazer Upload do Arquivo Excel</label>
                     <div class="file-upload">
                         <input type="file" id="fileUpload" accept=".xlsx,.xls" onchange="handleFileUpload(event)">
                         <label for="fileUpload" class="file-upload-label">
@@ -299,88 +428,58 @@
             <!-- Stats will be dynamically populated -->
         </div>
         
-        <div class="info-text">
+        <div class="no-data" id="noData">
+            <h3>📊 Nenhum dado carregado</h3>
+            <p>Faça o upload de um arquivo Excel para visualizar o funil de vendas.</p>
+            <p>O arquivo deve estar no formato da planilha ARIVI.</p>
+        </div>
+        
+        <div class="info-text" style="display: none;" id="infoText">
             <p><strong>💡 Como interpretar:</strong> O diagrama mostra o fluxo de leads desde o volume total até os status finais. Leads com FUP pendente são subdivididos por temperatura (Quente/Morna/Fria), e os desinteresses mostram seus respectivos motivos.</p>
         </div>
         
-        <div class="chart-container">
+        <div class="chart-container" style="display: none;" id="chartContainer">
             <div id="sankey"></div>
         </div>
     </div>
 
-    <script src="leads_data.js"></script>
     <script>
-        let allData = leadsData.filter(row => row['Date Created'] !== null && row['Date Created'] !== '');
+        // Password protection
+        const CORRECT_PASSWORD = 'arivi2024'; // MUDE AQUI PARA SUA SENHA
+        let isAuthenticated = false;
+        let allData = [];
         
-        // Wait for everything to load
-        window.addEventListener('load', function() {
-            populateFilters();
-            initializeDates();
-            renderDiagram(allData);
-        });
-        
-        function populateFilters() {
-            // Populate Status da Task filter
-            const statusSet = new Set();
-            allData.forEach(row => {
-                const status = row['Status da Task'];
-                if (status) statusSet.add(status);
-            });
+        function login() {
+            const password = document.getElementById('passwordInput').value;
+            const loginError = document.getElementById('loginError');
             
-            const statusFilter = document.getElementById('statusFilter');
-            statusFilter.innerHTML = '<option value="">Todos</option>';
-            
-            // Add in specific order
-            const statusOrder = ['ATIVO', 'PRÉ-AGENDAMENTO', 'LEAD SEM INTERESSE', 'LEAD COM FUP PENDENTE', 'CHURN', 'LISTA DE ESPERA'];
-            statusOrder.forEach(status => {
-                if (statusSet.has(status)) {
-                    const option = document.createElement('option');
-                    option.value = status;
-                    option.textContent = status;
-                    statusFilter.appendChild(option);
-                }
-            });
-            
-            // Populate Status do Lead filter
-            const leadStatusSet = new Set();
-            allData.forEach(row => {
-                const leadStatus = row['Status do Lead (drop down)'];
-                if (leadStatus && leadStatus.trim() !== '') leadStatusSet.add(leadStatus);
-            });
-            
-            const statusLeadFilter = document.getElementById('statusLeadFilter');
-            statusLeadFilter.innerHTML = '<option value="">Todos</option>';
-            
-            // Add in specific order
-            const leadStatusOrder = ['Quente', 'Morna', 'Fria', 'Sem Interesse'];
-            leadStatusOrder.forEach(status => {
-                if (leadStatusSet.has(status)) {
-                    const option = document.createElement('option');
-                    option.value = status;
-                    option.textContent = status;
-                    statusLeadFilter.appendChild(option);
-                }
-            });
-            
-            // Populate UTM Source filter
-            const utmSourceSet = new Set();
-            allData.forEach(row => {
-                const utmSource = row['UTM - Source (short text)'];
-                if (utmSource && utmSource.trim() !== '') utmSourceSet.add(utmSource);
-            });
-            
-            const utmSourceFilter = document.getElementById('utmSourceFilter');
-            utmSourceFilter.innerHTML = '<option value="">Todos</option>';
-            
-            // Sort alphabetically
-            const sortedUtmSources = Array.from(utmSourceSet).sort();
-            sortedUtmSources.forEach(source => {
-                const option = document.createElement('option');
-                option.value = source;
-                option.textContent = source;
-                utmSourceFilter.appendChild(option);
-            });
+            if (password === CORRECT_PASSWORD) {
+                isAuthenticated = true;
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
+                loginError.style.display = 'none';
+            } else {
+                loginError.style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
         }
+        
+        function logout() {
+            isAuthenticated = false;
+            allData = [];
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('noData').style.display = 'block';
+            document.getElementById('chartContainer').style.display = 'none';
+            document.getElementById('infoText').style.display = 'none';
+        }
+        
+        // Focus password input on load
+        window.addEventListener('load', function() {
+            document.getElementById('passwordInput').focus();
+        });
         
         function handleFileUpload(event) {
             const file = event.target.files[0];
@@ -395,19 +494,20 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
                     
-                    // Get first sheet
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1, defval: null});
                     
                     console.log('Total de linhas no Excel:', jsonData.length);
                     
-                    // Process Excel structure (same as Python logic)
                     const processedData = processExcelData(jsonData);
                     
                     console.log('Dados processados:', processedData.length);
                     
                     if (processedData.length > 0) {
                         allData = processedData;
+                        document.getElementById('noData').style.display = 'none';
+                        document.getElementById('chartContainer').style.display = 'block';
+                        document.getElementById('infoText').style.display = 'block';
                         populateFilters();
                         initializeDates();
                         renderDiagram(allData);
@@ -420,7 +520,6 @@
                     alert('❌ Erro ao ler arquivo: ' + error.message);
                 } finally {
                     document.getElementById('loading').classList.remove('active');
-                    // Reset file input
                     event.target.value = '';
                 }
             };
@@ -437,7 +536,6 @@
         function processExcelData(jsonData) {
             console.log('Processando Excel...');
             
-            // Find section headers
             const sections = [];
             for (let i = 0; i < jsonData.length; i++) {
                 const firstCol = jsonData[i] && jsonData[i][0] ? String(jsonData[i][0]).trim().toUpperCase() : '';
@@ -453,7 +551,6 @@
                 return [];
             }
             
-            // Process each section
             const allProcessed = [];
             
             for (let i = 0; i < sections.length; i++) {
@@ -462,10 +559,8 @@
                 
                 console.log(`Processando seção: ${section.name} (linhas ${section.row} a ${nextRow})`);
                 
-                // Header is next row after section name
                 const headerRow = section.row + 1;
                 
-                // Skip if header row doesn't exist
                 if (headerRow >= jsonData.length) continue;
                 
                 const headers = jsonData[headerRow];
@@ -475,7 +570,6 @@
                     continue;
                 }
                 
-                // Data starts 2 rows after section name
                 let rowsAdded = 0;
                 for (let j = section.row + 2; j < nextRow; j++) {
                     const row = jsonData[j];
@@ -484,7 +578,6 @@
                     
                     const firstCell = String(row[0]).trim().toUpperCase();
                     
-                    // Skip if it's a header row or section name
                     if (firstCell === 'TASK ID' || 
                         ['CHURN', 'LEAD SEM INTERESSE', 'ATIVO', 'PRÉ-AGENDAMENTO', 'LEAD COM FUP PENDENTE', 'LISTA DE ESPERA'].includes(firstCell)) {
                         continue;
@@ -499,7 +592,6 @@
                     
                     rowObj['Status da Task'] = section.name;
                     
-                    // Only add if has Date Created
                     if (rowObj['Date Created']) {
                         allProcessed.push(rowObj);
                         rowsAdded++;
@@ -511,6 +603,63 @@
             
             console.log('Total processado:', allProcessed.length);
             return allProcessed;
+        }
+        
+        function populateFilters() {
+            const statusSet = new Set();
+            allData.forEach(row => {
+                const status = row['Status da Task'];
+                if (status) statusSet.add(status);
+            });
+            
+            const statusFilter = document.getElementById('statusFilter');
+            statusFilter.innerHTML = '<option value="">Todos</option>';
+            
+            const statusOrder = ['ATIVO', 'PRÉ-AGENDAMENTO', 'LEAD SEM INTERESSE', 'LEAD COM FUP PENDENTE', 'CHURN', 'LISTA DE ESPERA'];
+            statusOrder.forEach(status => {
+                if (statusSet.has(status)) {
+                    const option = document.createElement('option');
+                    option.value = status;
+                    option.textContent = status;
+                    statusFilter.appendChild(option);
+                }
+            });
+            
+            const leadStatusSet = new Set();
+            allData.forEach(row => {
+                const leadStatus = row['Status do Lead (drop down)'];
+                if (leadStatus && leadStatus.trim() !== '') leadStatusSet.add(leadStatus);
+            });
+            
+            const statusLeadFilter = document.getElementById('statusLeadFilter');
+            statusLeadFilter.innerHTML = '<option value="">Todos</option>';
+            
+            const leadStatusOrder = ['Quente', 'Morna', 'Fria', 'Sem Interesse'];
+            leadStatusOrder.forEach(status => {
+                if (leadStatusSet.has(status)) {
+                    const option = document.createElement('option');
+                    option.value = status;
+                    option.textContent = status;
+                    statusLeadFilter.appendChild(option);
+                }
+            });
+            
+            const utmSourceSet = new Set();
+            allData.forEach(row => {
+                const utmSource = row['UTM - Source (short text)'];
+                if (utmSource && utmSource.trim() !== '') utmSourceSet.add(utmSource);
+            });
+            
+            const utmSourceFilter = document.getElementById('utmSourceFilter');
+            utmSourceFilter.innerHTML = '<option value="">Todos</option>';
+            
+            const sortedUtmSources = Array.from(utmSourceSet).sort();
+            sortedUtmSources.forEach(source => {
+                const option = document.createElement('option');
+                option.value = source;
+                option.textContent = source;
+                utmSourceFilter.appendChild(option);
+            });
         }
         
         function initializeDates() {
@@ -531,12 +680,9 @@
                     console.log('Data mínima dos dados:', minDate.toISOString().split('T')[0]);
                     console.log('Data máxima dos dados:', maxDate.toISOString().split('T')[0]);
                     
-                    // DEIXAR VAZIO para mostrar todos os dados por padrão
-                    // Usuário escolhe as datas manualmente se quiser filtrar
                     document.getElementById('dateFrom').value = '';
                     document.getElementById('dateTo').value = '';
                     
-                    // Set min/max attributes to help user
                     document.getElementById('dateFrom').setAttribute('min', minDate.toISOString().split('T')[0]);
                     document.getElementById('dateFrom').setAttribute('max', maxDate.toISOString().split('T')[0]);
                     document.getElementById('dateTo').setAttribute('min', minDate.toISOString().split('T')[0]);
@@ -569,7 +715,6 @@
             let filteredData = allData;
             console.log('Total antes dos filtros:', filteredData.length);
             
-            // Filter by Status da Task
             if (statusFilter) {
                 filteredData = filteredData.filter(row => {
                     const statusTask = row['Status da Task'];
@@ -578,7 +723,6 @@
                 console.log('Após filtro Status da Task:', filteredData.length);
             }
             
-            // Filter by Status do Lead
             if (statusLeadFilter) {
                 filteredData = filteredData.filter(row => {
                     const statusLead = row['Status do Lead (drop down)'];
@@ -587,7 +731,6 @@
                 console.log('Após filtro Status do Lead:', filteredData.length);
             }
             
-            // Filter by UTM Source
             if (utmSourceFilter) {
                 filteredData = filteredData.filter(row => {
                     const utmSource = row['UTM - Source (short text)'];
@@ -596,7 +739,6 @@
                 console.log('Após filtro UTM Source:', filteredData.length);
             }
             
-            // Filter by date range
             if (dateFrom) {
                 filteredData = filteredData.filter(row => {
                     const dateCreated = row['Date Created'];
@@ -624,24 +766,20 @@
         }
         
         function renderDiagram(data) {
-            // Calculate flows
             const totalLeads = data.length;
             
-            // Count by Status da Task
             const taskStatusCounts = {};
             data.forEach(row => {
                 const status = row['Status da Task'] || 'Não definido';
                 taskStatusCounts[status] = (taskStatusCounts[status] || 0) + 1;
             });
             
-            // Count leads with FUP by temperature
             const fupByTemp = {};
             data.filter(row => row['Status da Task'] === 'LEAD COM FUP PENDENTE').forEach(row => {
                 const temp = row['Status do Lead (drop down)'] || 'Não definido';
                 fupByTemp[temp] = (fupByTemp[temp] || 0) + 1;
             });
             
-            // Count reasons for disinterest FOR ALL STATUSES
             const disinterestByStatus = {};
             
             data.forEach(row => {
@@ -656,14 +794,12 @@
                 }
             });
             
-            // Build Sankey data
             const nodes = [];
             const links = [];
             let nodeIndex = 0;
             
             const nodeMap = {};
             
-            // Helper function to add node
             function addNode(label, color) {
                 if (!nodeMap[label]) {
                     nodeMap[label] = nodeIndex++;
@@ -676,10 +812,8 @@
                 return nodeMap[label];
             }
             
-            // Add total leads node
             const totalNode = addNode(`Total de Leads<br>${totalLeads}`, '#451372');
             
-            // Add task status nodes and links in specific order
             const statusColors = {
                 'ATIVO': '#451372',
                 'LEAD SEM INTERESSE': '#dc3545',
@@ -689,10 +823,8 @@
                 'LISTA DE ESPERA': '#6c757d'
             };
             
-            // Define the order we want (ATIVO e PRÉ-AGENDAMENTO no topo)
             const statusOrder = ['ATIVO', 'PRÉ-AGENDAMENTO', 'LEAD SEM INTERESSE', 'LEAD COM FUP PENDENTE', 'CHURN', 'LISTA DE ESPERA'];
             
-            // Add nodes in the specified order (only show if has data)
             statusOrder.forEach(status => {
                 if (taskStatusCounts[status] && taskStatusCounts[status] > 0) {
                     const count = taskStatusCounts[status];
@@ -707,7 +839,6 @@
                 }
             });
             
-            // Add temperature subdivisions for FUP leads
             const tempColors = {
                 'Quente': '#ff6b6b',
                 'Morna': '#feca57',
@@ -729,13 +860,11 @@
                 });
             }
             
-            // Add disinterest reasons FOR EACH STATUS that has them
             Object.entries(disinterestByStatus).forEach(([status, reasons]) => {
                 const statusNodeLabel = `${status}<br>${taskStatusCounts[status]}`;
                 const statusNode = nodeMap[statusNodeLabel];
                 
                 if (statusNode !== undefined) {
-                    // Get top 10 reasons for this status
                     const topReasons = Object.entries(reasons)
                         .sort((a, b) => b[1] - a[1])
                         .slice(0, 10);
@@ -753,13 +882,12 @@
                 }
             });
             
-            // Create Sankey diagram
             const sankeyData = [{
                 type: "sankey",
                 orientation: "h",
                 node: {
-                    pad: 30,
-                    thickness: 25,
+                    pad: 50,
+                    thickness: 30,
                     line: {
                         color: "white",
                         width: 2
@@ -805,7 +933,6 @@
             
             Plotly.newPlot('sankey', sankeyData, layout, config);
             
-            // Update stats
             updateStats(data, taskStatusCounts, fupByTemp);
         }
         
