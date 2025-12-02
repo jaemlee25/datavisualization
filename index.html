@@ -451,12 +451,12 @@
                 </div>
                 
                 <div class="filter-item">
-                    <label for="dateFrom">📅 Data Inicial</label>
+                    <label for="dateFrom">📅 Data Inicial (deixe vazio para ver tudo)</label>
                     <input type="date" id="dateFrom">
                 </div>
                 
                 <div class="filter-item">
-                    <label for="dateTo">📅 Data Final</label>
+                    <label for="dateTo">📅 Data Final (deixe vazio para ver tudo)</label>
                     <input type="date" id="dateTo">
                 </div>
                 
@@ -484,6 +484,7 @@
             <h3>📊 Nenhum dado carregado</h3>
             <p>Faça o upload de um arquivo Excel para visualizar o funil de vendas.</p>
             <p>O arquivo deve estar no formato da planilha ARIVI.</p>
+            <p><strong>💡 Dica:</strong> Os dados serão salvos automaticamente no seu navegador após o upload.</p>
         </div>
         
         <div class="info-text" style="display: none;" id="infoText">
@@ -504,21 +505,39 @@
         // Load data from localStorage on page load
         function loadFromStorage() {
             try {
+                console.log('🔍 Tentando carregar dados do localStorage...');
+                
                 const savedData = localStorage.getItem('ariviLeadsData');
                 const lastUpdate = localStorage.getItem('ariviLastUpdate');
                 
+                console.log('📦 Dados salvos encontrados:', savedData ? 'SIM' : 'NÃO');
+                console.log('📅 Última atualização encontrada:', lastUpdate ? 'SIM' : 'NÃO');
+                
                 if (savedData) {
                     allData = JSON.parse(savedData);
-                    console.log('Dados carregados do localStorage:', allData.length, 'leads');
+                    console.log('✅ Dados carregados do localStorage:', allData.length, 'leads');
+                    console.log('📊 Exemplo do primeiro lead:', allData[0]);
                     
                     if (allData.length > 0) {
                         document.getElementById('noData').style.display = 'none';
                         document.getElementById('chartContainer').style.display = 'block';
                         document.getElementById('infoText').style.display = 'block';
+                        
+                        console.log('🎨 Populando filtros...');
                         populateFilters();
+                        
+                        console.log('📅 Inicializando datas...');
                         initializeDates();
+                        
+                        console.log('📊 Renderizando diagrama...');
                         renderDiagram(allData);
+                        
+                        console.log('✅ Tudo carregado com sucesso!');
+                    } else {
+                        console.warn('⚠️ localStorage tem dados mas array está vazio');
                     }
+                } else {
+                    console.log('ℹ️ Nenhum dado salvo no localStorage. Faça upload do Excel.');
                 }
                 
                 if (lastUpdate) {
@@ -527,7 +546,8 @@
                     document.getElementById('lastUpdate').textContent = '';
                 }
             } catch (error) {
-                console.error('Erro ao carregar dados do localStorage:', error);
+                console.error('❌ Erro ao carregar dados do localStorage:', error);
+                console.error('Stack trace:', error.stack);
             }
         }
         
@@ -570,15 +590,20 @@
             const password = document.getElementById('passwordInput').value;
             const loginError = document.getElementById('loginError');
             
+            console.log('🔐 Tentando fazer login...');
+            
             if (password === CORRECT_PASSWORD) {
+                console.log('✅ Senha correta!');
                 isAuthenticated = true;
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('mainContainer').style.display = 'block';
                 loginError.style.display = 'none';
                 
+                console.log('📂 Carregando dados salvos...');
                 // Load saved data after login
                 loadFromStorage();
             } else {
+                console.log('❌ Senha incorreta');
                 loginError.style.display = 'block';
                 document.getElementById('passwordInput').value = '';
                 document.getElementById('passwordInput').focus();
